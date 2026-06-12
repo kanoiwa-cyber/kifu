@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>寄附金申込 | 加納岩総合病院</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF8F3;
+    --card:#FFFFFF;
+    --ink:#22333B;
+    --ink-soft:#5A6B72;
+    --primary:#1A5A6E;       /* 深い青緑：信頼・誠実 */
+    --primary-dark:#10434F;
+    --accent:#B9803F;        /* 落ち着いた金茶：感謝・温かみ */
+    --line:#DDD8CE;
+    --danger:#B4452E;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{font-size:16px}
+  body{
+    font-family:"Noto Sans JP",sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.8;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:720px;margin:0 auto;padding:0 20px 80px}
+
+  /* ===== ヘッダー ===== */
+  header{
+    background:var(--primary-dark);
+    color:#fff;
+    padding:34px 20px 30px;
+    text-align:center;
+  }
+  header .hosp{font-size:.85rem;letter-spacing:.25em;opacity:.85}
+  header h1{
+    font-family:"Noto Serif JP",serif;
+    font-weight:600;
+    font-size:1.7rem;
+    letter-spacing:.12em;
+    margin-top:6px;
+  }
+
+  /* ===== ご挨拶 ===== */
+  .greeting{
+    margin:36px 0 30px;
+    padding-left:18px;
+    border-left:3px solid var(--accent);
+  }
+  .greeting p{font-size:.95rem;color:var(--ink-soft)}
+  .greeting .lead{
+    font-family:"Noto Serif JP",serif;
+    font-size:1.05rem;
+    color:var(--ink);
+    margin-bottom:8px;
+  }
+  .notes{
+    background:#F2EFE7;
+    border-radius:var(--radius);
+    padding:16px 20px;
+    font-size:.85rem;
+    color:var(--ink-soft);
+    margin-bottom:36px;
+  }
+  .notes p{padding-left:1.2em;text-indent:-1.2em}
+
+  /* ===== ステップ表示 ===== */
+  .steps{display:flex;justify-content:center;gap:0;margin-bottom:34px}
+  .step{
+    display:flex;align-items:center;gap:8px;
+    font-size:.85rem;color:var(--ink-soft);
+  }
+  .step .num{
+    width:28px;height:28px;border-radius:50%;
+    border:1.5px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:.8rem;background:#fff;
+  }
+  .step.active{color:var(--primary);font-weight:700}
+  .step.active .num{background:var(--primary);border-color:var(--primary);color:#fff}
+  .step.done .num{background:var(--accent);border-color:var(--accent);color:#fff}
+  .step-bar{width:34px;height:1.5px;background:var(--line);margin:0 10px;align-self:center}
+
+  /* ===== カード・フォーム ===== */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:30px 28px;
+  }
+  .field{margin-bottom:26px}
+  label.title{
+    display:flex;align-items:center;gap:8px;
+    font-weight:700;font-size:.95rem;margin-bottom:8px;
+  }
+  .req{
+    background:var(--danger);color:#fff;
+    font-size:.68rem;font-weight:500;
+    border-radius:3px;padding:1px 7px;letter-spacing:.05em;
+  }
+  .opt{
+    background:#8C979B;color:#fff;
+    font-size:.68rem;font-weight:500;
+    border-radius:3px;padding:1px 7px;letter-spacing:.05em;
+  }
+  .hint{font-size:.8rem;color:var(--ink-soft);margin-top:6px}
+  input[type=text],input[type=tel]{
+    width:100%;
+    border:1.5px solid var(--line);
+    border-radius:8px;
+    padding:12px 14px;
+    font-size:1rem;
+    font-family:inherit;
+    background:#fff;
+    transition:border-color .15s;
+  }
+  input:focus{outline:none;border-color:var(--primary)}
+  input.error{border-color:var(--danger)}
+  .err-msg{display:none;color:var(--danger);font-size:.8rem;margin-top:5px}
+  .err-msg.show{display:block}
+
+  /* 金額クイック選択 */
+  .amount-row{display:flex;align-items:center;gap:10px}
+  .amount-row input{flex:1;text-align:right;font-size:1.15rem;letter-spacing:.03em}
+  .amount-row .yen{font-size:1.1rem;font-weight:700}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .chip{
+    border:1.5px solid var(--line);
+    background:#fff;border-radius:999px;
+    padding:6px 16px;font-size:.85rem;
+    cursor:pointer;font-family:inherit;color:var(--ink);
+    transition:all .15s;
+  }
+  .chip:hover{border-color:var(--primary);color:var(--primary)}
+  .chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
+
+  /* 匿名チェック */
+  .anon{
+    display:flex;align-items:center;gap:8px;
+    margin-top:10px;font-size:.88rem;cursor:pointer;color:var(--ink-soft);
+  }
+  .anon input{width:17px;height:17px;accent-color:var(--primary);cursor:pointer}
+
+  /* 選択カード（支払い方法・領収証） */
+  .choice{display:grid;gap:10px}
+  .choice label{
+    display:flex;gap:12px;align-items:flex-start;
+    border:1.5px solid var(--line);
+    border-radius:8px;padding:14px 16px;
+    cursor:pointer;background:#fff;
+    transition:all .15s;
+  }
+  .choice label:hover{border-color:var(--primary)}
+  .choice input{margin-top:5px;width:17px;height:17px;accent-color:var(--primary);flex-shrink:0;cursor:pointer}
+  .choice label.on{border-color:var(--primary);background:#F2F8F9}
+  .choice .c-title{font-weight:700;font-size:.95rem}
+  .choice .c-sub{font-size:.8rem;color:var(--ink-soft);margin-top:2px}
+
+  /* 領収証セクション */
+  #receiptSec{
+    display:none;
+    margin-top:4px;
+    border-top:1px dashed var(--line);
+    padding-top:24px;
+  }
+  #receiptSec.show{display:block}
+  #receiptDetail{display:none;margin-top:20px}
+  #receiptDetail.show{display:block}
+  .fixed-note{
+    background:#F2EFE7;border-radius:8px;
+    padding:12px 16px;font-size:.85rem;margin-bottom:20px;
+  }
+  .fixed-note b{color:var(--primary-dark)}
+
+  /* ボタン */
+  .btn{
+    display:block;width:100%;
+    border:none;border-radius:8px;
+    padding:16px;font-size:1.05rem;font-weight:700;
+    font-family:inherit;cursor:pointer;
+    letter-spacing:.1em;transition:opacity .15s;
+  }
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{opacity:.88}
+  .btn-ghost{
+    background:none;border:1.5px solid var(--line);
+    color:var(--ink-soft);margin-top:12px;
+  }
+  .btn-ghost:hover{border-color:var(--ink-soft)}
+
+  /* ===== 確認画面 ===== */
+  .confirm-table{width:100%;border-collapse:collapse;margin-bottom:28px}
+  .confirm-table th,.confirm-table td{
+    text-align:left;padding:14px 6px;
+    border-bottom:1px solid var(--line);
+    font-size:.95rem;vertical-align:top;
+  }
+  .confirm-table th{width:36%;color:var(--ink-soft);font-weight:500}
+  .confirm-table td{font-weight:700}
+  .confirm-table td .amt{font-size:1.2rem;color:var(--primary-dark)}
+
+  /* ===== 完了画面 ===== */
+  .done-head{text-align:center;margin-bottom:26px}
+  .done-head .mark{
+    width:56px;height:56px;border-radius:50%;
+    background:var(--accent);color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;margin:0 auto 14px;
+  }
+  .done-head h2{
+    font-family:"Noto Serif JP",serif;
+    font-size:1.35rem;font-weight:600;letter-spacing:.08em;
+  }
+  .done-head p{font-size:.9rem;color:var(--ink-soft);margin-top:6px}
+  .bank-box{
+    border:1.5px solid var(--primary);
+    border-radius:var(--radius);
+    overflow:hidden;margin-bottom:22px;
+  }
+  .bank-box .bb-head{
+    background:var(--primary);color:#fff;
+    padding:10px 18px;font-weight:700;font-size:.95rem;letter-spacing:.08em;
+  }
+  .bank-box table{width:100%;border-collapse:collapse}
+  .bank-box th,.bank-box td{
+    padding:13px 18px;font-size:.95rem;text-align:left;
+    border-bottom:1px solid var(--line);
+  }
+  .bank-box tr:last-child th,.bank-box tr:last-child td{border-bottom:none}
+  .bank-box th{width:34%;color:var(--ink-soft);font-weight:500;background:#FAF8F3}
+  .bank-box td{font-weight:700}
+  .keep-note{
+    font-size:.85rem;color:var(--danger);
+    text-align:center;margin-bottom:8px;font-weight:700;
+  }
+  .square-note{
+    background:#F2F8F9;border:1px solid var(--primary);
+    border-radius:var(--radius);padding:18px 20px;
+    font-size:.9rem;margin-bottom:22px;
+  }
+  .square-note b{color:var(--primary-dark)}
+  .countdown{text-align:center;font-size:.85rem;color:var(--ink-soft);margin-top:12px}
+  .refund{
+    border-top:1px dashed var(--line);
+    margin-top:28px;padding-top:18px;
+    font-size:.84rem;color:var(--ink-soft);
+  }
+  .refund .r-title{
+    font-weight:700;color:var(--ink);
+    font-size:.9rem;margin-bottom:4px;
+  }
+  .refund p + p{margin-top:6px}
+
+  footer{
+    text-align:center;font-size:.85rem;color:var(--ink-soft);
+    margin-top:50px;padding-top:24px;border-top:1px solid var(--line);
+  }
+  footer .tel{font-size:1.15rem;font-weight:700;color:var(--ink);letter-spacing:.05em}
+
+  .view{display:none}
+  .view.show{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  @media(prefers-reduced-motion:reduce){.view.show{animation:none}}
+  @media(max-width:540px){
+    .card{padding:24px 18px}
+    header h1{font-size:1.4rem}
+    .step span.lbl{display:none}
+    .step.active span.lbl{display:inline}
+    .confirm-table th{width:42%}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hosp">社会医療法人 加納岩</div>
+  <h1>加納岩総合病院 寄附金申込</h1>
+</header>
+
+<div class="wrap">
+
+  <!-- ============ STEP 1: 入力 ============ -->
+  <div id="view-input" class="view show">
+
+    <div class="greeting">
+      <p class="lead">温かいご支援を賜り、厚く御礼申し上げます。</p>
+      <p>下記フォームに必要事項をご記入のうえ、お進みください。</p>
+    </div>
+
+    <div class="notes">
+      <p>※ 現金でのご寄附をご希望の方は、病院総合窓口にお申し出ください。</p>
+      <p>※ 当院への寄附は税制上の優遇措置（寄附金控除）の対象外となります。</p>
+      <p>※ お振込みでのご寄附は、ご希望により後日領収証を発行し郵送いたします。</p>
+      <p>※ 本寄附はクーリング・オフの適用対象外です。金額の間違い等による返金は、決済日より7日以内に限り承ります（詳細は申込完了画面にてご案内いたします）。</p>
+    </div>
+
+    <div class="steps">
+      <div class="step active"><span class="num">1</span><span class="lbl">ご入力</span></div>
+      <div class="step-bar"></div>
+      <div class="step"><span class="num">2</span><span class="lbl">ご確認</span></div>
+      <div class="step-bar"></div>
+      <div class="step"><span class="num">3</span><span class="lbl">完了</span></div>
+    </div>
+
+    <div class="card">
+
+      <!-- お名前 -->
+      <div class="field">
+        <label class="title" for="name">お名前 <span class="req">必須</span></label>
+        <input type="text" id="name" placeholder="例）加納 太郎" autocomplete="name">
+        <label class="anon"><input type="checkbox" id="anonChk"> 匿名で寄附する</label>
+        <p class="err-msg" id="err-name">お名前をご入力ください（匿名の場合はチェックを入れてください）</p>
+      </div>
+
+      <!-- お電話番号 -->
+      <div class="field">
+        <label class="title" for="tel">お電話番号 <span class="req">必須</span></label>
+        <input type="tel" id="tel" inputmode="numeric" placeholder="例）0553-22-2511" autocomplete="tel" style="max-width:280px">
+        <p class="hint">※ ご入力内容に確認が必要な場合のご連絡にのみ使用いたします。</p>
+        <p class="err-msg" id="err-tel">お電話番号をご入力ください</p>
+      </div>
+
+      <!-- 寄附金額 -->
+      <div class="field">
+        <label class="title" for="amount">寄附金額 <span class="req">必須</span></label>
+        <div class="amount-row">
+          <input type="tel" id="amount" inputmode="numeric" placeholder="10,000">
+          <span class="yen">円</span>
+        </div>
+        <div class="chips">
+          <button type="button" class="chip" data-amt="5000">5,000円</button>
+          <button type="button" class="chip" data-amt="10000">10,000円</button>
+          <button type="button" class="chip" data-amt="30000">30,000円</button>
+          <button type="button" class="chip" data-amt="50000">50,000円</button>
+          <button type="button" class="chip" data-amt="100000">100,000円</button>
+        </div>
+        <p class="err-msg" id="err-amount">寄附金額を半角数字でご入力ください</p>
+      </div>
+
+      <!-- お支払い方法 -->
+      <div class="field">
+        <span class="title">お支払い方法 <span class="req">必須</span></span>
+        <div class="choice" id="payChoice">
+          <label>
+            <input type="radio" name="pay" value="bank">
+            <span>
+              <span class="c-title">銀行振込</span>
+              <span class="c-sub" style="display:block">送信後の画面に振込先口座を表示します。領収証は後日郵送となります。</span>
+            </span>
+          </label>
+          <label>
+            <input type="radio" name="pay" value="square">
+            <span>
+              <span class="c-title">クレジットカード・電子決済</span>
+              <span class="c-sub" style="display:block">送信後、決済ページ（Square）へ移動します。</span>
+            </span>
+          </label>
+        </div>
+        <p class="err-msg" id="err-pay">お支払い方法をお選びください</p>
+      </div>
+
+      <!-- 領収証（銀行振込のみ） -->
+      <div id="receiptSec">
+        <div class="field">
+          <span class="title">領収証の発行 <span class="req">必須</span></span>
+          <div class="choice" id="receiptChoice">
+            <label>
+              <input type="radio" name="receipt" value="yes">
+              <span><span class="c-title">領収証の発行を希望する</span>
+              <span class="c-sub" style="display:block">後日郵送となります</span></span>
+            </label>
+            <label>
+              <input type="radio" name="receipt" value="no">
+              <span><span class="c-title">領収証の発行を希望しない</span></span>
+            </label>
+          </div>
+          <p class="err-msg" id="err-receipt">領収証の発行についてお選びください</p>
+        </div>
+
+        <div id="receiptDetail">
+          <div class="fixed-note">
+            但書きは <b>「社会医療法人 加納岩総合病院への寄附金として」</b> となります。
+          </div>
+          <div class="field">
+            <label class="title" for="rname">領収証に記載するお名前 <span class="req">必須</span></label>
+            <input type="text" id="rname" placeholder="例）加納 太郎">
+            <p class="hint">※ 匿名をご希望の方は「上様」と記載させていただきます。予めご了承ください。</p>
+            <p class="err-msg" id="err-rname">領収証に記載するお名前をご入力ください</p>
+          </div>
+          <div class="field">
+            <label class="title" for="zip">ご郵送先の郵便番号 <span class="req">必須</span></label>
+            <input type="tel" id="zip" inputmode="numeric" placeholder="例）405-0018" autocomplete="postal-code" style="max-width:220px">
+            <p class="err-msg" id="err-zip">郵便番号をご入力ください</p>
+          </div>
+          <div class="field">
+            <label class="title" for="addr">ご郵送先のご住所 <span class="req">必須</span></label>
+            <input type="text" id="addr" placeholder="例）山梨県山梨市上神内川○○○" autocomplete="street-address">
+            <p class="err-msg" id="err-addr">ご住所をご入力ください</p>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" onclick="goConfirm()">入力内容を確認する</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 2: 確認 ============ -->
+  <div id="view-confirm" class="view">
+    <div class="steps">
+      <div class="step done"><span class="num">✓</span><span class="lbl">ご入力</span></div>
+      <div class="step-bar"></div>
+      <div class="step active"><span class="num">2</span><span class="lbl">ご確認</span></div>
+      <div class="step-bar"></div>
+      <div class="step"><span class="num">3</span><span class="lbl">完了</span></div>
+    </div>
+
+    <div class="card">
+      <p style="font-weight:700;margin-bottom:18px">以下の内容でよろしければ「申し込む」を押してください。</p>
+      <table class="confirm-table" id="confirmTable"></table>
+      <button type="button" class="btn btn-primary" id="submitBtn" onclick="submitForm()">この内容で申し込む</button>
+      <button type="button" class="btn btn-ghost" onclick="backToInput()">入力画面に戻る</button>
+    </div>
+  </div>
+
+  <!-- ============ STEP 3: 完了 ============ -->
+  <div id="view-done" class="view">
+    <div class="steps">
+      <div class="step done"><span class="num">✓</span><span class="lbl">ご入力</span></div>
+      <div class="step-bar"></div>
+      <div class="step done"><span class="num">✓</span><span class="lbl">ご確認</span></div>
+      <div class="step-bar"></div>
+      <div class="step active"><span class="num">3</span><span class="lbl">完了</span></div>
+    </div>
+
+    <div class="card">
+      <div class="done-head">
+        <div class="mark">✓</div>
+        <h2>お申込みを受け付けました</h2>
+        <p>温かいご支援を賜り、厚く御礼申し上げます。</p>
+        <p id="recvNo" style="margin-top:4px"></p>
+      </div>
+
+      <!-- 銀行振込の場合 -->
+      <div id="doneBank" style="display:none">
+        <p class="keep-note">この画面は閉じる前に、印刷またはスクリーンショットで保存してください。</p>
+        <div class="bank-box">
+          <div class="bb-head">お振込先</div>
+          <table>
+            <tr><th>金融機関</th><td>○○銀行</td></tr>
+            <tr><th>支店名</th><td>○○支店（支店番号 ○○○）</td></tr>
+            <tr><th>口座種別</th><td>普通</td></tr>
+            <tr><th>口座番号</th><td>○○○○○○○</td></tr>
+            <tr><th>口座名義</th><td>シャカイイリョウホウジン カノイワ</td></tr>
+          </table>
+        </div>
+        <p style="font-size:.88rem;color:var(--ink-soft)">
+          ※ 恐れ入りますが、振込手数料はご負担をお願いいたします。<br>
+          ※ お申込みのお名前と異なる名義でお振込みの場合は、寄附金事務局までご連絡ください。<br>
+          <span id="doneBankReceipt"></span>
+        </p>
+      </div>
+
+      <!-- Square決済の場合 -->
+      <div id="doneSquare" style="display:none">
+        <div class="square-note">
+          続いて決済ページ（Square）へ移動します。<br>
+          決済ページにて、寄附金額 <b id="sqAmt"></b> をご入力のうえ、お手続きをお願いいたします。
+        </div>
+        <button type="button" class="btn btn-primary" id="sqBtn" onclick="goSquare()">決済ページへ進む</button>
+        <p class="countdown" id="sqCount"></p>
+      </div>
+
+      <!-- 返金規定（共通表示） -->
+      <div class="refund">
+        <p class="r-title">返金に関するご案内</p>
+        <p>本寄附はクーリング・オフの適用対象外ですが、金額の間違い等の場合は、決済日より7日以内に限り払い戻しを承ります。本サイト上ではお手続きいただけないため、お手数ですが下記の寄附金事務局までご連絡ください。期限を過ぎてからの返金は致しかねますので、何卒ご了承ください。</p>
+        <p>※ 本寄附金は税制上の優遇措置（寄附金控除）の対象外となります。</p>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>ご不明な点は、お気軽にお問い合わせください。</p>
+    <p>加納岩総合病院　寄附金事務局</p>
+    <p class="tel">0553-22-2511</p>
+  </footer>
+</div>
+
+<script>
+/* ============================================================
+   ▼▼▼ 運用前に必ず設定してください ▼▼▼
+============================================================ */
+const CONFIG = {
+  // Squareで作成した「寄付を受け付ける」支払いリンクのURL
+  SQUARE_URL: "https://square.link/u/XXXXXXXX",
+
+  // 申込データの記録先（Google Apps ScriptのウェブアプリURL）
+  // 空文字 "" のままでも画面は動作します（記録なし）
+  GAS_URL: "",
+
+  // Squareページへの自動遷移までの秒数（0で自動遷移なし）
+  REDIRECT_SEC: 5
+};
+/* ============================================================ */
+
+const $ = id => document.getElementById(id);
+let formData = {};
+
+/* ---------- 金額入力 ---------- */
+const amountInput = $("amount");
+amountInput.addEventListener("input", () => {
+  const raw = amountInput.value.replace(/[^\d]/g, "");
+  amountInput.value = raw ? Number(raw).toLocaleString("ja-JP") : "";
+  document.querySelectorAll(".chip").forEach(c =>
+    c.classList.toggle("on", c.dataset.amt === raw));
+});
+document.querySelectorAll(".chip").forEach(chip => {
+  chip.addEventListener("click", () => {
+    amountInput.value = Number(chip.dataset.amt).toLocaleString("ja-JP");
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
+    chip.classList.add("on");
+  });
+});
+
+/* ---------- 匿名チェック ---------- */
+$("anonChk").addEventListener("change", e => {
+  const nameEl = $("name");
+  if (e.target.checked) {
+    nameEl.value = "匿名";
+    nameEl.disabled = true;
+  } else {
+    nameEl.value = "";
+    nameEl.disabled = false;
+  }
+});
+
+/* ---------- ラジオ選択の見た目＆分岐 ---------- */
+function bindChoice(groupId, name, onChange) {
+  document.querySelectorAll(`#${groupId} input[name=${name}]`).forEach(r => {
+    r.addEventListener("change", () => {
+      document.querySelectorAll(`#${groupId} label`).forEach(l => l.classList.remove("on"));
+      r.closest("label").classList.add("on");
+      if (onChange) onChange(r.value);
+    });
+  });
+}
+bindChoice("payChoice", "pay", v => {
+  $("receiptSec").classList.toggle("show", v === "bank");
+});
+bindChoice("receiptChoice", "receipt", v => {
+  $("receiptDetail").classList.toggle("show", v === "yes");
+  if (v === "yes" && $("anonChk").checked && !$("rname").value) {
+    $("rname").value = "上様";
+  }
+});
+
+/* ---------- バリデーション ---------- */
+function setErr(inputId, errId, bad) {
+  const el = $(inputId);
+  if (el) el.classList.toggle("error", bad);
+  $(errId).classList.toggle("show", bad);
+  return bad;
+}
+function validate() {
+  let ok = true;
+  const pay = document.querySelector("input[name=pay]:checked");
+  const receipt = document.querySelector("input[name=receipt]:checked");
+  const amtRaw = amountInput.value.replace(/[^\d]/g, "");
+
+  if (setErr("name", "err-name", !$("name").value.trim())) ok = false;
+  const telRaw = $("tel").value.replace(/[^\d]/g, "");
+  if (setErr("tel", "err-tel", telRaw.length < 10 || telRaw.length > 11)) ok = false;
+  if (setErr("amount", "err-amount", !amtRaw || Number(amtRaw) <= 0)) ok = false;
+  if (setErr(null, "err-pay", !pay)) ok = false;
+
+  if (pay && pay.value === "bank") {
+    if (setErr(null, "err-receipt", !receipt)) ok = false;
+    if (receipt && receipt.value === "yes") {
+      if (setErr("rname", "err-rname", !$("rname").value.trim())) ok = false;
+      if (setErr("zip", "err-zip", !$("zip").value.trim())) ok = false;
+      if (setErr("addr", "err-addr", !$("addr").value.trim())) ok = false;
+    }
+  }
+  return ok;
+}
+
+/* ---------- 画面遷移 ---------- */
+function show(viewId) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("show"));
+  $(viewId).classList.add("show");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function goConfirm() {
+  if (!validate()) {
+    const firstErr = document.querySelector(".err-msg.show");
+    if (firstErr) firstErr.scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+  const pay = document.querySelector("input[name=pay]:checked").value;
+  const receipt = document.querySelector("input[name=receipt]:checked");
+  formData = {
+    name: $("name").value.trim(),
+    tel: $("tel").value.trim(),
+    amount: Number(amountInput.value.replace(/[^\d]/g, "")),
+    pay,
+    receipt: pay === "bank" ? receipt.value : "",
+    rname: pay === "bank" && receipt.value === "yes" ? $("rname").value.trim() : "",
+    zip:   pay === "bank" && receipt.value === "yes" ? $("zip").value.trim() : "",
+    addr:  pay === "bank" && receipt.value === "yes" ? $("addr").value.trim() : ""
+  };
+
+  const rows = [];
+  rows.push(["お名前", formData.name]);
+  rows.push(["お電話番号", formData.tel]);
+  rows.push(["寄附金額", `<span class="amt">${formData.amount.toLocaleString("ja-JP")} 円</span>`]);
+  rows.push(["お支払い方法", formData.pay === "bank" ? "銀行振込" : "クレジットカード・電子決済（Square）"]);
+  if (formData.pay === "bank") {
+    rows.push(["領収証の発行", formData.receipt === "yes" ? "希望する（後日郵送）" : "希望しない"]);
+    if (formData.receipt === "yes") {
+      rows.push(["領収証のお名前", formData.rname]);
+      rows.push(["ご郵送先", `〒${formData.zip}<br>${formData.addr}`]);
+    }
+  }
+  $("confirmTable").innerHTML = rows
+    .map(([th, td]) => `<tr><th>${th}</th><td>${td}</td></tr>`).join("");
+  show("view-confirm");
+}
+
+function backToInput() { show("view-input"); }
+
+/* ---------- 送信 ---------- */
+let redirectTimer = null;
+async function submitForm() {
+  const btn = $("submitBtn");
+  btn.disabled = true;
+  btn.textContent = "送信中…";
+
+  const recvNo = "K" + new Date().toISOString().slice(0,10).replace(/-/g,"")
+               + "-" + String(Date.now()).slice(-5);
+
+  // 申込データを記録（GAS設定済みの場合）
+  if (CONFIG.GAS_URL) {
+    try {
+      const body = new URLSearchParams({
+        recvNo,
+        name: formData.name,
+        tel: formData.tel,
+        amount: formData.amount,
+        pay: formData.pay === "bank" ? "銀行振込" : "カード・電子決済",
+        receipt: formData.receipt === "yes" ? "希望する" : (formData.receipt === "no" ? "希望しない" : ""),
+        rname: formData.rname,
+        zip: formData.zip,
+        addr: formData.addr
+      });
+      await fetch(CONFIG.GAS_URL, { method: "POST", mode: "no-cors", body });
+    } catch (e) { /* 記録失敗時も申込画面は止めない */ }
+  }
+
+  $("recvNo").textContent = "受付番号：" + recvNo;
+
+  if (formData.pay === "bank") {
+    $("doneBank").style.display = "block";
+    $("doneSquare").style.display = "none";
+    $("doneBankReceipt").innerHTML = formData.receipt === "yes"
+      ? "※ ご入金の確認後、領収証を郵送いたします。"
+      : "";
+  } else {
+    $("doneBank").style.display = "none";
+    $("doneSquare").style.display = "block";
+    $("sqAmt").textContent = formData.amount.toLocaleString("ja-JP") + " 円";
+    if (CONFIG.REDIRECT_SEC > 0) {
+      let sec = CONFIG.REDIRECT_SEC;
+      $("sqCount").textContent = `${sec}秒後に自動的に移動します`;
+      redirectTimer = setInterval(() => {
+        sec--;
+        if (sec <= 0) { clearInterval(redirectTimer); goSquare(); }
+        else $("sqCount").textContent = `${sec}秒後に自動的に移動します`;
+      }, 1000);
+    }
+  }
+
+  btn.disabled = false;
+  btn.textContent = "この内容で申し込む";
+  show("view-done");
+}
+
+function goSquare() {
+  if (redirectTimer) clearInterval(redirectTimer);
+  window.location.href = CONFIG.SQUARE_URL;
+}
+</script>
+</body>
+</html>
