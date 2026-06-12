@@ -129,16 +129,6 @@
   .amount-row{display:flex;align-items:center;gap:10px}
   .amount-row input{flex:1;text-align:right;font-size:1.15rem;letter-spacing:.03em}
   .amount-row .yen{font-size:1.1rem;font-weight:700}
-  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
-  .chip{
-    border:1.5px solid var(--line);
-    background:#fff;border-radius:999px;
-    padding:6px 16px;font-size:.85rem;
-    cursor:pointer;font-family:inherit;color:var(--ink);
-    transition:all .15s;
-  }
-  .chip:hover{border-color:var(--primary);color:var(--primary)}
-  .chip.on{background:var(--primary);border-color:var(--primary);color:#fff}
 
   /* 匿名チェック */
   .anon{
@@ -333,13 +323,6 @@
           <input type="tel" id="amount" inputmode="numeric" placeholder="10,000">
           <span class="yen">円</span>
         </div>
-        <div class="chips">
-          <button type="button" class="chip" data-amt="5000">5,000円</button>
-          <button type="button" class="chip" data-amt="10000">10,000円</button>
-          <button type="button" class="chip" data-amt="30000">30,000円</button>
-          <button type="button" class="chip" data-amt="50000">50,000円</button>
-          <button type="button" class="chip" data-amt="100000">100,000円</button>
-        </div>
         <p class="err-msg" id="err-amount">寄附金額を半角数字でご入力ください</p>
       </div>
 
@@ -452,11 +435,11 @@
         <div class="bank-box">
           <div class="bb-head">お振込先</div>
           <table>
-            <tr><th>金融機関</th><td>○○銀行</td></tr>
-            <tr><th>支店名</th><td>○○支店（支店番号 ○○○）</td></tr>
+            <tr><th>金融機関</th><td>山梨中央銀行</td></tr>
+            <tr><th>支店名</th><td>日下部支店</td></tr>
             <tr><th>口座種別</th><td>普通</td></tr>
-            <tr><th>口座番号</th><td>○○○○○○○</td></tr>
-            <tr><th>口座名義</th><td>シャカイイリョウホウジン カノイワ</td></tr>
+            <tr><th>口座番号</th><td>21769</td></tr>
+            <tr><th>口座名義</th><td>シャ）カノイワ　カノイワソウゴウビョウイン</td></tr>
           </table>
         </div>
         <p style="font-size:.88rem;color:var(--ink-soft)">
@@ -470,7 +453,8 @@
       <div id="doneSquare" style="display:none">
         <div class="square-note">
           続いて決済ページ（Square）へ移動します。<br>
-          決済ページにて、寄附金額 <b id="sqAmt"></b> をご入力のうえ、お手続きをお願いいたします。
+          決済ページにて、寄附金額 <b id="sqAmt"></b> をご入力のうえ、お手続きをお願いいたします。<br>
+          ※ 紙の領収証をご希望の方は、寄附金事務局（0553-22-2511）までご連絡ください。
         </div>
         <button type="button" class="btn btn-primary" id="sqBtn" onclick="goSquare()">決済ページへ進む</button>
         <p class="countdown" id="sqCount"></p>
@@ -498,7 +482,7 @@
 ============================================================ */
 const CONFIG = {
   // Squareで作成した「寄付を受け付ける」支払いリンクのURL
-  SQUARE_URL: "https://square.link/u/XXXXXXXX",
+  SQUARE_URL: "https://square.link/u/liOvF6o6",
 
   // 申込データの記録先（Google Apps ScriptのウェブアプリURL）
   // 空文字 "" のままでも画面は動作します（記録なし）
@@ -512,20 +496,11 @@ const CONFIG = {
 const $ = id => document.getElementById(id);
 let formData = {};
 
-/* ---------- 金額入力 ---------- */
+/* ---------- 金額入力（桁区切り） ---------- */
 const amountInput = $("amount");
 amountInput.addEventListener("input", () => {
   const raw = amountInput.value.replace(/[^\d]/g, "");
   amountInput.value = raw ? Number(raw).toLocaleString("ja-JP") : "";
-  document.querySelectorAll(".chip").forEach(c =>
-    c.classList.toggle("on", c.dataset.amt === raw));
-});
-document.querySelectorAll(".chip").forEach(chip => {
-  chip.addEventListener("click", () => {
-    amountInput.value = Number(chip.dataset.amt).toLocaleString("ja-JP");
-    document.querySelectorAll(".chip").forEach(c => c.classList.remove("on"));
-    chip.classList.add("on");
-  });
 });
 
 /* ---------- 匿名チェック ---------- */
