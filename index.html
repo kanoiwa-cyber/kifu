@@ -348,6 +348,11 @@
         <p class="err-msg" id="err-pay">お支払い方法をお選びください</p>
       </div>
 
+      <!-- 匿名時の案内（領収証なし） -->
+      <div id="anonReceiptNote" class="fixed-note" style="display:none;margin-bottom:26px">
+        匿名でのお申込みのため、領収証の発行は行っておりません。予めご了承ください。
+      </div>
+
       <!-- 領収証（銀行振込のみ） -->
       <div id="receiptSec">
         <div class="field">
@@ -373,7 +378,7 @@
           <div class="field">
             <label class="title" for="rname">領収証に記載するお名前 <span class="req">必須</span></label>
             <input type="text" id="rname" placeholder="例）加納 太郎">
-            <p class="hint">※ 匿名をご希望の方は「上様」と記載させていただきます。予めご了承ください。</p>
+            <p class="hint">※ ご記入いただいたお名前で領収証を発行いたします。</p>
             <p class="err-msg" id="err-rname">領収証に記載するお名前をご入力ください</p>
           </div>
           <div class="field">
@@ -513,6 +518,7 @@ $("anonChk").addEventListener("change", e => {
     nameEl.value = "";
     nameEl.disabled = false;
   }
+  updateReceiptVisibility();
 });
 
 /* ---------- ラジオ選択の見た目＆分岐 ---------- */
@@ -525,15 +531,32 @@ function bindChoice(groupId, name, onChange) {
     });
   });
 }
-bindChoice("payChoice", "pay", v => {
-  $("receiptSec").classList.toggle("show", v === "bank");
-});
+bindChoice("payChoice", "pay", () => updateReceiptVisibility());
 bindChoice("receiptChoice", "receipt", v => {
   $("receiptDetail").classList.toggle("show", v === "yes");
-  if (v === "yes" && $("anonChk").checked && !$("rname").value) {
-    $("rname").value = "上様";
-  }
 });
+
+/* 領収証セクションの表示制御：
+   銀行振込 かつ 匿名でない場合のみ表示。
+   匿名の場合は領収証を出さず、案内文を表示する（支払い方法を問わず）。 */
+function updateReceiptVisibility() {
+  const pay = document.querySelector("input[name=pay]:checked");
+  const isBank = pay && pay.value === "bank";
+  const isAnon = $("anonChk").checked;
+
+  if (isAnon) {
+    // 匿名：領収証セクションを隠し、選択をリセット。案内文を表示
+    $("receiptSec").classList.remove("show");
+    $("receiptDetail").classList.remove("show");
+    document.querySelectorAll("input[name=receipt]").forEach(r => { r.checked = false; });
+    document.querySelectorAll("#receiptChoice label").forEach(l => l.classList.remove("on"));
+    $("anonReceiptNote").style.display = isBank ? "block" : "none";
+  } else {
+    // 記名：銀行振込のときだけ領収証セクションを表示
+    $("anonReceiptNote").style.display = "none";
+    $("receiptSec").classList.toggle("show", isBank);
+  }
+}
 
 /* ---------- バリデーション ---------- */
 function setErr(inputId, errId, bad) {
@@ -554,7 +577,7 @@ function validate() {
   if (setErr("amount", "err-amount", !amtRaw || Number(amtRaw) <= 0)) ok = false;
   if (setErr(null, "err-pay", !pay)) ok = false;
 
-  if (pay && pay.value === "bank") {
+  if (pay && pay.value === "bank" && !$("anonChk").checked) {
     if (setErr(null, "err-receipt", !receipt)) ok = false;
     if (receipt && receipt.value === "yes") {
       if (setErr("rname", "err-rname", !$("rname").value.trim())) ok = false;
@@ -580,15 +603,18 @@ function goConfirm() {
   }
   const pay = document.querySelector("input[name=pay]:checked").value;
   const receipt = document.querySelector("input[name=receipt]:checked");
+  const isAnon = $("anonChk").checked;
+  // 匿名の場合は領収証なし。記名かつ銀行振込のときのみ領収証情報を持つ
+  const hasReceipt = !isAnon && pay === "bank" && receipt && receipt.value === "yes";
   formData = {
     name: $("name").value.trim(),
     tel: $("tel").value.trim(),
     amount: Number(amountInput.value.replace(/[^\d]/g, "")),
     pay,
-    receipt: pay === "bank" ? receipt.value : "",
-    rname: pay === "bank" && receipt.value === "yes" ? $("rname").value.trim() : "",
-    zip:   pay === "bank" && receipt.value === "yes" ? $("zip").value.trim() : "",
-    addr:  pay === "bank" && receipt.value === "yes" ? $("addr").value.trim() : ""
+    receipt: (!isAnon && pay === "bank" && receipt) ? receipt.value : "",
+    rname: hasReceipt ? $("rname").value.trim() : "",
+    zip:   hasReceipt ? $("zip").value.trim() : "",
+    addr:  hasReceipt ? $("addr").value.trim() : ""
   };
 
   const rows = [];
@@ -596,7 +622,7 @@ function goConfirm() {
   rows.push(["お電話番号", formData.tel]);
   rows.push(["寄附金額", `<span class="amt">${formData.amount.toLocaleString("ja-JP")} 円</span>`]);
   rows.push(["お支払い方法", formData.pay === "bank" ? "銀行振込" : "クレジットカード・電子決済（Square）"]);
-  if (formData.pay === "bank") {
+  if (formData.pay === "bank" && formData.receipt) {
     rows.push(["領収証の発行", formData.receipt === "yes" ? "希望する（後日郵送）" : "希望しない"]);
     if (formData.receipt === "yes") {
       rows.push(["領収証のお名前", formData.rname]);
